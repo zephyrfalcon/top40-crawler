@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+import io
+import os
 import ssl
 import sys
-import urllib.request
+import urllib.request, urllib.parse
 #
 from bs4 import BeautifulSoup
 import requests
@@ -34,6 +36,14 @@ class Top40Crawler:
                 # Handle target environment that doesn't support HTTPS verification
                 ssl._create_default_https_context = _create_unverified_https_context
 
+    def ensure_dir_exists(self, dir):
+        try:
+            os.makedirs(dir)
+        except OSError:
+            # TODO: distinguish between "directory already exists" and other
+            # exceptions
+            pass
+
     def download_pdfs(self):
         if self.week is not None:
             weekrange = range(self.week, self.week+1)
@@ -46,8 +56,11 @@ class Top40Crawler:
             print(url)
             try:
                 self.download_pdf_from(url, self.year)
-            except: # FIXME: be more specific
-                import traceback; traceback.print_exc()
+            except Exception as e: 
+                sio = io.StringIO()
+                import traceback; traceback.print_exc(file=sio)
+                last_line = sio.getvalue().split('\n')[-2].strip()
+                print("!", last_line)
                 print("Could not download PDF")
 
     def download_pdf_from(self, url, year):
@@ -70,8 +83,18 @@ class Top40Crawler:
             print("No PDF link was found for:", url)
 
     def download_to(self, url, dir):
+        self.ensure_dir_exists(dir)
         print("Downloading", url, "to", dir)
+        with urllib.request.urlopen(url) as u:
+            data = u.read()
 
+        result = urllib.parse.urlparse(url)
+        url_path = result.path
+        parts = os.path.split(url_path)
+        filename = parts[-1]
+        target_path = os.path.join(dir, filename)
+        with open(target_path, 'wb') as f:
+            f.write(data)
 
 if __name__ == "__main__":
     
@@ -84,7 +107,6 @@ if __name__ == "__main__":
                         help="Only download the given week")
 
     args = parser.parse_args()
-    print(args)
 
     crawler = Top40Crawler(year=args.year, week=args.week)
     crawler.download_pdfs()
