@@ -100,7 +100,8 @@ class Top40Crawler:
             print("No PDF link was found for:", url)
 
         youtube_urls = [a.get('href') for a in a_tags
-                        if a.get('href') and 'youtube' in a.get('href')]
+                        if a.get('href') and 'youtube' in a.get('href')
+                        and not '/channel/' in a.get('href')]
         if youtube_urls:
             for url in youtube_urls:
                 self.youtube_urls.add(url)
