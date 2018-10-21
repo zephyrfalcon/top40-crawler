@@ -68,10 +68,14 @@ class Top40Crawler:
                 print("Could not download PDF")
 
         # write YouTube URLs we found
-        with open('urls.txt', 'w') as f:
+        if self.week:
+            url_filename = 'urls-%04d-%02d.txt' % (self.year, self.week)
+        else:
+            url_filename = 'urls-{year}.txt'.format(year=self.year)
+        with open(url_filename, 'w') as f:
             for url in self.youtube_urls:
                 print(url, file=f)
-        print(len(self.youtube_urls), "YouTube URLs collected in urls.txt")
+        print(len(self.youtube_urls), "YouTube URLs collected in", url_filename)
 
     def download_pdf_from(self, url, year):
         # slurp HTML
