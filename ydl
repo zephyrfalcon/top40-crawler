@@ -1,0 +1,6 @@
+#!/bin/sh
+FILENAME=$1
+shift
+NUM=$(youtube-dl -F ${FILENAME} --no-playlist | awk '$2 == "mp4"' | tail -1 | awk '{ print $1 }')
+echo "Best format found: $NUM"
+youtube-dl -f$NUM $FILENAME --no-playlist "$@"
