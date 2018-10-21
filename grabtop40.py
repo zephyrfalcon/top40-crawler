@@ -9,6 +9,8 @@ import urllib.request, urllib.parse
 #
 from bs4 import BeautifulSoup
 import requests
+#
+from OrderedSet import OrderedSet
 
 
 DOMAIN_URL = "https://www.top40.nl"
@@ -23,6 +25,8 @@ class Top40Crawler:
     def __init__(self, year, week=None):
         self.year = year
         self.week = week
+
+        self.youtube_urls = OrderedSet()  # YouTube URLs collected
 
         # work around hairy SSL certificate issue
         # see: https://stackoverflow.com/a/39779918/27426
@@ -63,6 +67,12 @@ class Top40Crawler:
                 print("!", last_line)
                 print("Could not download PDF")
 
+        # write YouTube URLs we found
+        with open('urls.txt', 'w') as f:
+            for url in self.youtube_urls:
+                print(url, file=f)
+        print(len(self.youtube_urls), "YouTube URLs collected in urls.txt")
+
     def download_pdf_from(self, url, year):
         # slurp HTML
         with urllib.request.urlopen(url, timeout=30) as u:
@@ -70,6 +80,9 @@ class Top40Crawler:
 
         # parse HTML
         soup = BeautifulSoup(data, 'html.parser')
+
+        with open('blah.html', 'w') as f:
+            f.write(soup.prettify())
 
         a_tags = soup.find_all('a')
         stuff = [a for a in a_tags 
@@ -81,6 +94,12 @@ class Top40Crawler:
             self.download_to(url, dir)
         else:
             print("No PDF link was found for:", url)
+
+        youtube_urls = [a.get('href') for a in a_tags
+                        if a.get('href') and 'youtube' in a.get('href')]
+        if youtube_urls:
+            for url in youtube_urls:
+                self.youtube_urls.add(url)
 
     def download_to(self, url, dir):
         self.ensure_dir_exists(dir)
