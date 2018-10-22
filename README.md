@@ -32,7 +32,7 @@ As noted above, YouTube URLs are collected and stored as well. When downloading 
 
 ### What to do with the video URLs?
 
-Other than visiting them, you could use a tool like `youtube-dl` to download the videos. I of course in no way endorse this. ;-) 
+Other than visiting them, you could use a tool like [`youtube-dl`](https://rg3.github.io/youtube-dl/) to download the videos. I of course in no way endorse this. ;-) 
 
 ### Disclaimer
 
