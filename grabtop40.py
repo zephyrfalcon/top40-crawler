@@ -19,6 +19,7 @@ YOUTUBE_DL_URL = "ydl '{url}'"  # replace with your own
 PDF_DEFAULT_DIR = "pdf-{year}"
 VIDEO_DEFAULT_DIR = "videos-{year}"
 
+DEBUG = False
 
 class Top40Crawler:
     
@@ -85,8 +86,9 @@ class Top40Crawler:
         # parse HTML
         soup = BeautifulSoup(data, 'html.parser')
 
-        with open('blah.html', 'w') as f:
-            f.write(soup.prettify())
+        if DEBUG:
+            with open('blah.html', 'w') as f:
+                f.write(soup.prettify())
 
         a_tags = soup.find_all('a')
         stuff = [a for a in a_tags 
