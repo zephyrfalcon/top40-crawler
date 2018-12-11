@@ -15,17 +15,20 @@ from OrderedSet import OrderedSet
 
 DOMAIN_URL = "https://www.top40.nl"
 BASE_URL = "https://www.top40.nl/top40/{year}/week-{week}"
+TIPPARADE_URL = "https://www.top40.nl/tipparade/{year}/week-{week}"
 YOUTUBE_DL_URL = "ydl '{url}'"  # replace with your own
-PDF_DEFAULT_DIR = "pdf-{year}"
+TOP40_DEFAULT_DIR = "top40-{year}"
+TIPPARADE_DEFAULT_DIR = "tipparade-{year}"
 VIDEO_DEFAULT_DIR = "videos-{year}"
 
 DEBUG = False
 
 class Top40Crawler:
     
-    def __init__(self, year, week=None):
+    def __init__(self, year, tip=False, week=None):
         self.year = year
         self.week = week
+        self.tip = tip
 
         self.youtube_urls = OrderedSet()  # YouTube URLs collected
 
@@ -57,7 +60,8 @@ class Top40Crawler:
 
         # try weeks 1-52 and 53 just in case it exists in some years
         for week in weekrange:
-            url = BASE_URL.format(year=self.year, week=week)
+            base = TIPPARADE_URL if self.tip else BASE_URL
+            url = base.format(year=self.year, week=week)
             print(url)
             try:
                 self.download_pdf_from(url, self.year)
@@ -96,7 +100,8 @@ class Top40Crawler:
         if stuff:
             href = stuff[0].get('href')
             url = DOMAIN_URL + href
-            dir = PDF_DEFAULT_DIR.format(year=year)
+            dir_temp = (TIPPARADE_DEFAULT_DIR if self.tip else TOP40_DEFAULT_DIR)
+            dir = dir_temp.format(year=year)
             self.download_to(url, dir)
         else:
             print("No PDF link was found for:", url)
@@ -131,9 +136,11 @@ if __name__ == "__main__":
                         help="The year to be downloaded")
     parser.add_argument('--week', metavar='week', type=int,
                         help="Only download the given week")
+    parser.add_argument('--tip', action="store_true",
+                        help="Download the tipparade instead")
 
     args = parser.parse_args()
 
-    crawler = Top40Crawler(year=args.year, week=args.week)
+    crawler = Top40Crawler(year=args.year, tip=args.tip, week=args.week)
     crawler.download_pdfs()
 
